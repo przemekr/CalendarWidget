@@ -20,6 +20,8 @@ import android.widget.RemoteViews;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class CalendarWidgetProvider extends AppWidgetProvider {
@@ -194,7 +196,8 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
     }
 
     private void render(Context context, int appWidgetId, int theme, int weekStartDay) {
-        Calendar cal = Calendar.getInstance();
+        TimeZone tz = TimeZone.getTimeZone("Europe/Stockholm");
+        Calendar cal = Calendar.getInstance(tz, Locale.US);
         int todayDate = cal.get(Calendar.DATE);
         int todayMonth = cal.get(Calendar.MONTH);
         int todayYear = cal.get(Calendar.YEAR);
@@ -223,6 +226,14 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         for (int i = 0; i < WEEKS; i++) {
             RemoteViews rowView = new RemoteViews(pkgName, R.layout.row_week);
 
+
+            // add week number ...
+            int layoutId = ResourceHelper.layoutCellDay(theme);
+            int week_nr  = cal.get(Calendar.WEEK_OF_YEAR);
+            RemoteViews dateView = new RemoteViews(pkgName, layoutId);
+            dateView.setTextViewText(android.R.id.text1, Integer.toString(week_nr));
+            rowView.addView(R.id.row_week, dateView);
+            
             for (int j = 0; j < 7; j++) {
                 int date = cal.get(Calendar.DATE);
                 int month = cal.get(Calendar.MONTH);
@@ -231,14 +242,13 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                 boolean isWithinMonth = month == selectedMonth;
                 boolean isToday = date == todayDate && month == todayMonth && year == todayYear;
 
-                int layoutId = ResourceHelper.layoutCellDay(theme);
                 if (isToday && isWithinMonth) {
                     layoutId = ResourceHelper.layoutCellToday(theme);
                 } else if (isWithinMonth) {
                     layoutId = ResourceHelper.layoutCellInMonth(theme);
                 }
 
-                RemoteViews dateView = new RemoteViews(pkgName, layoutId);
+                dateView = new RemoteViews(pkgName, layoutId);
                 dateView.setTextViewText(android.R.id.text1, Integer.toString(date));
                 dateView.setOnClickPendingIntent(
                             android.R.id.text1,
@@ -263,6 +273,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
 
     private void renderDayOfWeek(RemoteViews rv, int weekStartDay) {
         List<String> list = DayOfWeekHelper.getDayOfWeek(weekStartDay);
+        rv.setTextViewText(R.id.week_of_year, "W");
         rv.setTextViewText(R.id.day_of_week0, list.get(0));
         rv.setTextViewText(R.id.day_of_week1, list.get(1));
         rv.setTextViewText(R.id.day_of_week2, list.get(2));

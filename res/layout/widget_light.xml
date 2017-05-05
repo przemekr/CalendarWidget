@@ -44,6 +44,9 @@
         android:orientation="horizontal" >
         
         <TextView
+            android:id="@+id/week_of_year"
+            style="@style/cell_light"/>
+        <TextView
             android:id="@+id/day_of_week0"
             style="@style/cell_light"/>
         <TextView
